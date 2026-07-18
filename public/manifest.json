@@ -1,0 +1,13 @@
+{
+  "name": "My Vault",
+  "short_name": "Vault",
+  "description": "Personal encrypted vault — stored only on this device",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#0a0c10",
+  "theme_color": "#0a0c10",
+  "orientation": "portrait-primary",
+  "icons": [
+    { "src": "vault-icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}

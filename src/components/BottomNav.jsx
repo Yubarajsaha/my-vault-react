@@ -1,0 +1,95 @@
+import { useState } from 'react'
+
+const tabs = [
+  { id: 'home',    label: 'Home',    icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg> },
+  { id: 'docs',    label: 'Docs',    icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg> },
+  { id: 'add',     label: '',        fab: true },
+  { id: 'photos',  label: 'Photos',  icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg> },
+  { id: 'profile', label: 'Profile', icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> },
+]
+
+function NavBtn({ tab, active, onTab }) {
+  const [hov, setHov] = useState(false)
+  const isActive = active === tab.id
+
+  if (tab.fab) {
+    return (
+      <button
+        onClick={() => onTab(tab.id)}
+        onMouseEnter={() => setHov(true)}
+        onMouseLeave={() => setHov(false)}
+        style={{
+          width: 56, height: 56, borderRadius: '50%',
+          background: 'linear-gradient(135deg, #7c3aed, #a855f7)',
+          border: '2px solid rgba(255,255,255,0.15)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          flexShrink: 0, marginBottom: 12,
+          boxShadow: hov
+            ? '0 0 30px rgba(168,85,247,0.7), 0 8px 20px rgba(0,0,0,0.5)'
+            : '0 0 20px rgba(124,58,237,0.5), 0 4px 12px rgba(0,0,0,0.4)',
+          transform: hov ? 'scale(1.1) translateY(-2px)' : 'scale(1)',
+          transition: 'all 0.2s ease',
+        }}
+      >
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.2" strokeLinecap="round">
+          <line x1="12" y1="5" x2="12" y2="19"/>
+          <line x1="5" y1="12" x2="19" y2="12"/>
+        </svg>
+      </button>
+    )
+  }
+
+  return (
+    <button
+      onClick={() => onTab(tab.id)}
+      onMouseEnter={() => setHov(true)}
+      onMouseLeave={() => setHov(false)}
+      style={{
+        flex: 1, display: 'flex', flexDirection: 'column',
+        alignItems: 'center', gap: 4,
+        background: hov && !isActive ? 'rgba(255,255,255,0.04)' : 'none',
+        border: 'none', padding: '8px 0', borderRadius: 12,
+        color: isActive ? '#a78bfa' : hov ? '#8a96a8' : '#4a5260',
+        transition: 'all 0.15s',
+      }}
+    >
+      <span style={{ transform: isActive || hov ? 'scale(1.1)' : 'scale(1)', transition: 'transform 0.15s' }}>
+        {tab.icon}
+      </span>
+      <span style={{ fontSize: 10, fontWeight: 500, letterSpacing: '0.02em' }}>
+        {tab.label}
+      </span>
+      {isActive && (
+        <span style={{
+          position: 'absolute', bottom: 6,
+          width: 4, height: 4, borderRadius: '50%',
+          background: '#a78bfa',
+        }} />
+      )}
+    </button>
+  )
+}
+
+export default function BottomNav({ active, onTab }) {
+  return (
+    <nav style={S.nav}>
+      {tabs.map(t => <NavBtn key={t.id} tab={t} active={active} onTab={onTab} />)}
+    </nav>
+  )
+}
+
+const S = {
+  nav: {
+    position: 'fixed', bottom: 0, left: '50%',
+    transform: 'translateX(-50%)',
+    width: '100%', maxWidth: 520,
+    background: 'rgba(6,8,16,0.75)',
+    backdropFilter: 'blur(28px)',
+    WebkitBackdropFilter: 'blur(28px)',
+    borderTop: '1px solid rgba(255,255,255,0.08)',
+    display: 'flex', alignItems: 'center',
+    padding: '6px 12px 14px',
+    zIndex: 100,
+    boxShadow: '0 -8px 32px rgba(0,0,0,0.4)',
+  },
+}
