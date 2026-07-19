@@ -301,6 +301,8 @@ export default function App() {
         {tab === 'add'      && <AddPage      {...pageProps}/>}
         {tab === 'profile'  && <ProfilePage  {...pageProps}/>}
         {tab === 'settings' && <SettingsPage onLock={handleLock} onClearAll={handleClearAll} password={password} onPasswordSet={handlePasswordSet}/>}
+        {/* Extra space at bottom so content clears the nav bar */}
+        <div style={{ height: 80 }}/>
       </div>
 
       <BottomNav active={tab} onTab={setTab}/>
@@ -361,13 +363,11 @@ const D = {
 // Mobile styles
 const M = {
   shell: {
-    height: '100vh',
-    display: 'flex', flexDirection: 'column',
+    height: '100dvh',
+    display: 'flex',
+    flexDirection: 'column',
     background: '#060810',
-    overscrollBehavior: 'none',
-    position: 'fixed',
-    width: '100%',
-    top: 0, left: 0,
+    overflow: 'hidden',
   },
   topBar: {
     display: 'flex', justifyContent: 'space-between', alignItems: 'center',
@@ -379,8 +379,9 @@ const M = {
     borderBottom: '1px solid rgba(255,255,255,0.07)',
     flexShrink: 0,
     zIndex: 10,
+    position: 'relative',
   },
-  topLeft: { display:'flex', alignItems:'center', gap:10 },
+  topLeft: { display: 'flex', alignItems: 'center', gap: 10 },
   topLogo: {
     width: 34, height: 34, borderRadius: '50%',
     background: 'linear-gradient(135deg,#4c1d95,#7c3aed)',
@@ -388,8 +389,8 @@ const M = {
     fontSize: 16, boxShadow: '0 0 12px rgba(124,58,237,0.45)',
     flexShrink: 0,
   },
-  topTitle: { fontSize:15, fontWeight:700, color:'#f1f5f9', lineHeight:1.2 },
-  topSub:   { fontSize:9,  fontWeight:600, color:'#4a5260', letterSpacing:'0.12em' },
+  topTitle: { fontSize: 15, fontWeight: 700, color: '#f1f5f9', lineHeight: 1.2 },
+  topSub:   { fontSize: 9, fontWeight: 600, color: '#4a5260', letterSpacing: '0.12em' },
   lockBtn: {
     background: 'rgba(255,255,255,0.05)',
     backdropFilter: 'blur(10px)',
@@ -403,11 +404,10 @@ const M = {
   },
   content: {
     flex: 1,
-    overflowY: 'auto',
+    overflowY: 'scroll',
     overflowX: 'hidden',
-    padding: '12px 14px',
-    paddingBottom: 'calc(140px + env(safe-area-inset-bottom))',
+    padding: '12px 14px 160px',
     WebkitOverflowScrolling: 'touch',
-    scrollPaddingBottom: '140px',
+    position: 'relative',
   },
 }

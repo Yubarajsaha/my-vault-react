@@ -90,7 +90,7 @@ function NavBtn({ tab, active, onTab }) {
 export default function BottomNav({ active, onTab }) {
   return (
     <nav style={{
-      position: 'fixed', bottom: 0, left: 0, right: 0,
+      position: 'fixed', bottom: 0, left: 0, right: 0,zIndex: 200,
       background: 'rgba(6,8,16,0.92)',
       backdropFilter: 'blur(28px)',
       WebkitBackdropFilter: 'blur(28px)',
