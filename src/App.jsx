@@ -8,6 +8,7 @@ import AddPage        from './components/AddPage'
 import ProfilePage    from './components/ProfilePage'
 import SettingsPage   from './components/SettingsPage'
 import BottomNav      from './components/BottomNav'
+import UpdateBanner from './components/UpdateBanner'
 import { getUser, saveUser, getSettings, saveSettings, loadVault, saveVault, clearAll } from './store'
 import './index.css'
 
@@ -190,6 +191,7 @@ export default function App() {
   // Desktop layout
   if (isDesktop) return (
     <div style={D.shell}>
+      <UpdateBanner/>
       <aside style={D.sidebar}>
         <div style={D.sideTop}>
           <div style={D.sideLogo}>
@@ -273,6 +275,7 @@ export default function App() {
   // Mobile layout
   return (
     <div style={M.shell}>
+      <UpdateBanner/>
       <div style={M.topBar}>
         <div style={M.topLeft}>
           <div style={M.topLogo}>🔐</div>
@@ -403,7 +406,8 @@ const M = {
     overflowY: 'auto',
     overflowX: 'hidden',
     padding: '12px 14px',
-    paddingBottom: 'calc(80px + env(safe-area-inset-bottom))',
+    paddingBottom: 'calc(140px + env(safe-area-inset-bottom))',
     WebkitOverflowScrolling: 'touch',
+    scrollPaddingBottom: '140px',
   },
 }

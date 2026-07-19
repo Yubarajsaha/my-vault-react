@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { removeBiometric, isBiometricRegistered, registerBiometric, isBiometricAvailable } from '../biometric'
 import { getSettings, saveSettings } from '../store'
+import QRSync from './QRSync'
 
 function Toggle({ value, onChange }) {
   return (
@@ -78,6 +79,7 @@ export default function SettingsPage({ onLock, onClearAll, password, onPasswordS
   const [pwErr,        setPwErr]        = useState('')
   const [pwSuccess,    setPwSuccess]    = useState('')
   const [confirmClear, setConfirmClear] = useState(false)
+  const [showQR, setShowQR] = useState(false)
   const [bioMsg,       setBioMsg]       = useState('')
 
   async function handleSetPassword() {
@@ -156,15 +158,23 @@ export default function SettingsPage({ onLock, onClearAll, password, onPasswordS
         </Row>
       </Section>
 
-      <Section title="Storage & Backup">
+      <Section title="Sync & Backup">
+        <Row icon="📱" title="QR Sync" sub="Move vault to another device via QR code">
+          <SmallBtn onClick={() => setShowQR(!showQR)}>
+            {showQR ? 'Close' : 'Open'}
+          </SmallBtn>
+        </Row>
+        {showQR && (
+          <div style={{ padding: '14px 0' }}>
+            <QRSync
+              docs={[]} photos={[]} secrets={[]}
+              profile={{}} activity={[]}
+              password={password}
+            />
+          </div>
+        )}
         <Row icon="💾" title="Storage" sub="All data on this device only">
-          <span style={{ fontSize:11, color:'#4ade80' }}>Local ✅</span>
-        </Row>
-        <Row icon="📤" title="Export Vault" sub="Download encrypted backup">
-          <SmallBtn onClick={() => alert('Export feature coming soon!')}>Export</SmallBtn>
-        </Row>
-        <Row icon="📥" title="Import Vault" sub="Restore from backup file">
-          <SmallBtn onClick={() => alert('Import feature coming soon!')}>Import</SmallBtn>
+          <span style={{ fontSize: 11, color: '#4ade80' }}>Local ✅</span>
         </Row>
       </Section>
 
