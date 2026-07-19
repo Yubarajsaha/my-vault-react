@@ -51,9 +51,17 @@ export default function App() {
   useEffect(() => {
     const u        = getUser()
     const settings = getSettings()
+
     if (!u) {
+      // Clear any old vault data from previous versions
+      localStorage.removeItem('vaultData')
+      localStorage.removeItem('vaultData_v2')
+      localStorage.removeItem('vaultEntries')
       setAuthState('register')
-    } else if (settings.hasPassword || settings.hasBiometric) {
+      return
+    }
+
+    if (settings.hasPassword || settings.hasBiometric) {
       setUser(u)
       setAuthState('login')
     } else {
@@ -67,15 +75,17 @@ export default function App() {
       const raw = localStorage.getItem(NO_PW_KEY)
       if (raw) {
         const data = JSON.parse(raw)
-        setDocs(data.docs       || [])
-        setPhotos(data.photos   || [])
-        setSecrets(data.secrets || [])
-        setProfile(data.profile || { name:u?.name, avatar:u?.avatar })
+        setDocs(data.docs         || [])
+        setPhotos(data.photos     || [])
+        setSecrets(data.secrets   || [])
+        setProfile(data.profile   || { name: u?.name, avatar: u?.avatar })
         setActivity(data.activity || [])
       } else {
-        setProfile({ name:u?.name, avatar:u?.avatar })
+        setProfile({ name: u?.name, avatar: u?.avatar })
       }
-    } catch { setProfile({ name:u?.name, avatar:u?.avatar }) }
+    } catch {
+      setProfile({ name: u?.name, avatar: u?.avatar })
+    }
     setAuthState('vault')
   }
 
@@ -89,19 +99,19 @@ export default function App() {
 
   async function handleRegister(userData) {
     saveUser(userData)
-    saveSettings({ hasPassword:false, hasBiometric:false, autoLock:true })
+    saveSettings({ hasPassword: false, hasBiometric: false, autoLock: true })
     setUser(userData)
-    setProfile({ name:userData.name, avatar:userData.avatar })
+    setProfile({ name: userData.name, avatar: userData.avatar })
     setAuthState('vault')
   }
 
   async function handleUnlock(pw) {
     const data = await loadVault(pw)
     setPassword(pw)
-    setDocs(data.docs       || [])
-    setPhotos(data.photos   || [])
-    setSecrets(data.secrets || [])
-    setProfile(data.profile || { name:user?.name, avatar:user?.avatar })
+    setDocs(data.docs         || [])
+    setPhotos(data.photos     || [])
+    setSecrets(data.secrets   || [])
+    setProfile(data.profile   || { name: user?.name, avatar: user?.avatar })
     setActivity(data.activity || [])
     setAuthState('vault')
   }
@@ -124,31 +134,31 @@ export default function App() {
     await saveVault(newPw, data)
     localStorage.removeItem(NO_PW_KEY)
     setPassword(newPw)
-    saveSettings({ ...getSettings(), hasPassword:true })
+    saveSettings({ ...getSettings(), hasPassword: true })
   }
 
   async function handleAdded(type, entry, actEntry) {
-    let nd=docs, np=photos, ns=secrets
-    if (type==='docs')    nd=[...docs,   entry]
-    if (type==='photos')  np=[...photos, entry]
-    if (type==='secrets') ns=[...secrets,entry]
-    const na=[{ ...actEntry, ts:Date.now() }, ...activity].slice(0,20)
+    let nd = docs, np = photos, ns = secrets
+    if (type === 'docs')    nd = [...docs,    entry]
+    if (type === 'photos')  np = [...photos,  entry]
+    if (type === 'secrets') ns = [...secrets, entry]
+    const na = [{ ...actEntry, ts: Date.now() }, ...activity].slice(0, 20)
     setDocs(nd); setPhotos(np); setSecrets(ns); setActivity(na)
-    await persistVault(password, { docs:nd, photos:np, secrets:ns, profile, activity:na })
+    await persistVault(password, { docs: nd, photos: np, secrets: ns, profile, activity: na })
   }
 
   async function handleDelete(type, index) {
-    let nd=[...docs], np=[...photos], ns=[...secrets]
-    if (type==='docs')    nd.splice(index,1)
-    if (type==='photos')  np.splice(index,1)
-    if (type==='secrets') ns.splice(index,1)
+    let nd = [...docs], np = [...photos], ns = [...secrets]
+    if (type === 'docs')    nd.splice(index, 1)
+    if (type === 'photos')  np.splice(index, 1)
+    if (type === 'secrets') ns.splice(index, 1)
     setDocs(nd); setPhotos(np); setSecrets(ns)
-    await persistVault(password, { docs:nd, photos:np, secrets:ns, profile, activity })
+    await persistVault(password, { docs: nd, photos: np, secrets: ns, profile, activity })
   }
 
   async function handleProfileUpdate(p) {
     setProfile(p)
-    await persistVault(password, { docs, photos, secrets, profile:p, activity })
+    await persistVault(password, { docs, photos, secrets, profile: p, activity })
   }
 
   function handleClearAll() {
@@ -161,14 +171,15 @@ export default function App() {
 
   const pageProps = {
     docs, photos, secrets, profile, activity, password,
-    onTab:setTab, onDelete:handleDelete,
-    onAdded:handleAdded, onUpdate:handleProfileUpdate, onLock:handleLock,
+    onTab: setTab, onDelete: handleDelete,
+    onAdded: handleAdded, onUpdate: handleProfileUpdate, onLock: handleLock,
   }
 
-  // Loading
+  // Loading spinner
   if (authState === 'loading') return (
-    <div style={{ height:'100vh', display:'flex', alignItems:'center', justifyContent:'center', background:'#060810' }}>
-      <div style={{ fontSize:40, animation:'spin 1s linear infinite' }}>🔐</div>
+    <div style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#060810', flexDirection: 'column', gap: 16 }}>
+      <div style={{ fontSize: 40 }}>🔐</div>
+      <div style={{ width: 32, height: 32, borderRadius: '50%', border: '3px solid rgba(124,58,237,0.3)', borderTopColor: '#7c3aed', animation: 'spin 0.8s linear infinite' }}/>
       <style>{`@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}`}</style>
     </div>
   )
@@ -176,6 +187,7 @@ export default function App() {
   if (authState === 'register') return <RegisterScreen onRegister={handleRegister}/>
   if (authState === 'login')    return <LoginScreen user={user} onUnlock={handleUnlock}/>
 
+  // Desktop layout
   if (isDesktop) return (
     <div style={D.shell}>
       <aside style={D.sidebar}>
@@ -189,35 +201,45 @@ export default function App() {
           </div>
           <nav style={D.nav}>
             {NAV_ITEMS.filter(n => !n.fab && n.id !== 'settings').map(item => (
-              <SideBtn key={item.id} item={item} active={tab===item.id} onClick={() => setTab(item.id)}/>
+              <SideBtn key={item.id} item={item} active={tab === item.id} onClick={() => setTab(item.id)}/>
             ))}
           </nav>
           <button onClick={() => setTab('add')} style={{
             ...D.addBtn,
-            background: tab==='add' ? 'linear-gradient(135deg,#7c3aed,#a855f7)' : 'rgba(124,58,237,0.12)',
-            color: tab==='add' ? '#fff' : '#a78bfa',
-            border: tab==='add' ? '1px solid rgba(168,85,247,0.5)' : '1px solid rgba(124,58,237,0.25)',
+            background: tab === 'add' ? 'linear-gradient(135deg,#7c3aed,#a855f7)' : 'rgba(124,58,237,0.12)',
+            color:  tab === 'add' ? '#fff' : '#a78bfa',
+            border: tab === 'add' ? '1px solid rgba(168,85,247,0.5)' : '1px solid rgba(124,58,237,0.25)',
           }}>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round">
+              <line x1="12" y1="5" x2="12" y2="19"/>
+              <line x1="5"  y1="12" x2="19" y2="12"/>
+            </svg>
             Add New
           </button>
         </div>
         <div style={D.sideBottom}>
-          <SideBtn item={NAV_ITEMS.find(n=>n.id==='settings')} active={tab==='settings'} onClick={() => setTab('settings')}/>
+          <SideBtn
+            item={NAV_ITEMS.find(n => n.id === 'settings')}
+            active={tab === 'settings'}
+            onClick={() => setTab('settings')}
+          />
           <div style={D.sideProfile} onClick={() => setTab('profile')}>
             <div style={D.sideAvatar}>
               {profile.avatarData
-                ? <img src={profile.avatarData} style={{ width:'100%',height:'100%',objectFit:'cover',borderRadius:'50%' }} alt=""/>
-                : <span style={{ fontSize:18 }}>{profile.avatar || user?.avatar || '👤'}</span>
+                ? <img src={profile.avatarData} style={{ width:'100%', height:'100%', objectFit:'cover', borderRadius:'50%' }} alt=""/>
+                : <span style={{ fontSize: 18 }}>{profile.avatar || user?.avatar || '👤'}</span>
               }
             </div>
-            <div style={{ flex:1, minWidth:0 }}>
+            <div style={{ flex: 1, minWidth: 0 }}>
               <div style={D.sideProfileName}>{profile.name || user?.name || 'User'}</div>
               <div style={D.sideProfileSub}>Vault Owner</div>
             </div>
           </div>
           <button onClick={handleLock} style={D.lockBtn}>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="3" y="11" width="18" height="11" rx="2"/>
+              <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+            </svg>
             Lock Vault
           </button>
         </div>
@@ -227,27 +249,28 @@ export default function App() {
         <div style={D.topBar}>
           <div>
             <div style={D.pageTitle}>{PAGE_TITLES[tab]}</div>
-            <div style={D.pageSub}>{tab==='home'?'Overview':tab.toUpperCase()}</div>
+            <div style={D.pageSub}>{tab === 'home' ? 'Overview' : tab.toUpperCase()}</div>
           </div>
           <div style={D.topStats}>
-            <span style={D.topStat}><span style={{color:'#60a5fa'}}>{docs.length}</span> docs</span>
-            <span style={D.topStat}><span style={{color:'#34d399'}}>{photos.length}</span> photos</span>
-            <span style={D.topStat}><span style={{color:'#a78bfa'}}>{secrets.length}</span> secrets</span>
+            <span style={D.topStat}><span style={{ color:'#60a5fa' }}>{docs.length}</span> docs</span>
+            <span style={D.topStat}><span style={{ color:'#34d399' }}>{photos.length}</span> photos</span>
+            <span style={D.topStat}><span style={{ color:'#a78bfa' }}>{secrets.length}</span> secrets</span>
           </div>
         </div>
         <div style={D.content}>
-          {tab==='home'     && <HomePage     {...pageProps}/>}
-          {tab==='docs'     && <DocsPage     {...pageProps}/>}
-          {tab==='photos'   && <PhotosPage   {...pageProps}/>}
-          {tab==='add'      && <AddPage      {...pageProps}/>}
-          {tab==='profile'  && <ProfilePage  {...pageProps}/>}
-          {tab==='settings' && <SettingsPage onLock={handleLock} onClearAll={handleClearAll} password={password} onPasswordSet={handlePasswordSet}/>}
+          {tab === 'home'     && <HomePage     {...pageProps}/>}
+          {tab === 'docs'     && <DocsPage     {...pageProps}/>}
+          {tab === 'photos'   && <PhotosPage   {...pageProps}/>}
+          {tab === 'add'      && <AddPage      {...pageProps}/>}
+          {tab === 'profile'  && <ProfilePage  {...pageProps}/>}
+          {tab === 'settings' && <SettingsPage onLock={handleLock} onClearAll={handleClearAll} password={password} onPasswordSet={handlePasswordSet}/>}
         </div>
       </main>
       <BottomNav active={tab} onTab={setTab}/>
     </div>
   )
 
+  // Mobile layout
   return (
     <div style={M.shell}>
       <div style={M.topBar}>
@@ -258,19 +281,25 @@ export default function App() {
             <div style={M.topSub}>{tab.toUpperCase()}</div>
           </div>
         </div>
-        <button onClick={handleLock} style={M.lockBtn}
-          onMouseEnter={e=>{e.currentTarget.style.borderColor='rgba(248,113,113,0.4)';e.currentTarget.style.color='#f87171'}}
-          onMouseLeave={e=>{e.currentTarget.style.borderColor='rgba(255,255,255,0.1)';e.currentTarget.style.color='#8a96a8'}}
-        >🔒 Lock</button>
+        <button
+          onClick={handleLock}
+          style={M.lockBtn}
+          onMouseEnter={e => { e.currentTarget.style.borderColor='rgba(248,113,113,0.4)'; e.currentTarget.style.color='#f87171' }}
+          onMouseLeave={e => { e.currentTarget.style.borderColor='rgba(255,255,255,0.1)';  e.currentTarget.style.color='#8a96a8' }}
+        >
+          🔒 Lock
+        </button>
       </div>
+
       <div style={M.content}>
-        {tab==='home'     && <HomePage     {...pageProps}/>}
-        {tab==='docs'     && <DocsPage     {...pageProps}/>}
-        {tab==='photos'   && <PhotosPage   {...pageProps}/>}
-        {tab==='add'      && <AddPage      {...pageProps}/>}
-        {tab==='profile'  && <ProfilePage  {...pageProps}/>}
-        {tab==='settings' && <SettingsPage onLock={handleLock} onClearAll={handleClearAll} password={password} onPasswordSet={handlePasswordSet}/>}
+        {tab === 'home'     && <HomePage     {...pageProps}/>}
+        {tab === 'docs'     && <DocsPage     {...pageProps}/>}
+        {tab === 'photos'   && <PhotosPage   {...pageProps}/>}
+        {tab === 'add'      && <AddPage      {...pageProps}/>}
+        {tab === 'profile'  && <ProfilePage  {...pageProps}/>}
+        {tab === 'settings' && <SettingsPage onLock={handleLock} onClearAll={handleClearAll} password={password} onPasswordSet={handlePasswordSet}/>}
       </div>
+
       <BottomNav active={tab} onTab={setTab}/>
     </div>
   )
@@ -280,38 +309,45 @@ function SideBtn({ item, active, onClick }) {
   const [hov, setHov] = useState(false)
   if (!item) return null
   return (
-    <button onClick={onClick} onMouseEnter={() => setHov(true)} onMouseLeave={() => setHov(false)} style={{
-      display:'flex', alignItems:'center', gap:12, width:'100%', padding:'10px 14px', borderRadius:12,
-      border:'none', cursor:'pointer', fontSize:14, fontWeight:500,
-      background: active ? 'rgba(167,139,250,0.12)' : hov ? 'rgba(255,255,255,0.04)' : 'transparent',
-      color: active ? '#a78bfa' : hov ? '#c4b5fd' : '#6b7585',
-      transition:'all 0.15s',
-      borderLeft: active ? '2px solid #a78bfa' : '2px solid transparent',
-    }}>
+    <button
+      onClick={onClick}
+      onMouseEnter={() => setHov(true)}
+      onMouseLeave={() => setHov(false)}
+      style={{
+        display: 'flex', alignItems: 'center', gap: 12,
+        width: '100%', padding: '10px 14px', borderRadius: 12,
+        border: 'none', cursor: 'pointer', fontSize: 14, fontWeight: 500,
+        background: active ? 'rgba(167,139,250,0.12)' : hov ? 'rgba(255,255,255,0.04)' : 'transparent',
+        color:  active ? '#a78bfa' : hov ? '#c4b5fd' : '#6b7585',
+        transition: 'all 0.15s',
+        borderLeft: active ? '2px solid #a78bfa' : '2px solid transparent',
+      }}
+    >
       <span style={{ opacity: active ? 1 : 0.7 }}>{item.icon}</span>
       {item.label}
     </button>
   )
 }
 
+// Desktop styles
 const D = {
   shell: { height:'100vh', display:'flex', background:'#060810', position:'relative' },
   sidebar: { width:240, flexShrink:0, display:'flex', flexDirection:'column', justifyContent:'space-between', background:'rgba(255,255,255,0.03)', backdropFilter:'blur(24px)', WebkitBackdropFilter:'blur(24px)', borderRight:'1px solid rgba(255,255,255,0.07)', padding:'20px 12px' },
-  sideTop: { display:'flex', flexDirection:'column', gap:24 },
+  sideTop:  { display:'flex', flexDirection:'column', gap:24 },
   sideLogo: { display:'flex', alignItems:'center', gap:12, padding:'0 6px' },
-  sideLogoIcon: { width:40, height:40, borderRadius:12, background:'linear-gradient(135deg,#4c1d95,#7c3aed)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:20, boxShadow:'0 0 14px rgba(124,58,237,0.4)' },
+  sideLogoIcon:  { width:40, height:40, borderRadius:12, background:'linear-gradient(135deg,#4c1d95,#7c3aed)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:20, boxShadow:'0 0 14px rgba(124,58,237,0.4)' },
   sideLogoTitle: { fontSize:15, fontWeight:700, color:'#f1f5f9' },
   sideLogoSub:   { fontSize:10, color:'#4a5260', letterSpacing:'0.06em' },
-  nav: { display:'flex', flexDirection:'column', gap:2 },
-  addBtn: { display:'flex', alignItems:'center', gap:8, padding:'10px 14px', borderRadius:12, fontSize:14, fontWeight:600, cursor:'pointer', transition:'all 0.2s', width:'100%' },
+  nav:     { display:'flex', flexDirection:'column', gap:2 },
+  addBtn:  { display:'flex', alignItems:'center', gap:8, padding:'10px 14px', borderRadius:12, fontSize:14, fontWeight:600, cursor:'pointer', transition:'all 0.2s', width:'100%' },
   sideBottom: { display:'flex', flexDirection:'column', gap:8 },
   sideProfile: { display:'flex', alignItems:'center', gap:10, padding:'10px', borderRadius:12, background:'rgba(255,255,255,0.03)', border:'1px solid rgba(255,255,255,0.07)', cursor:'pointer' },
-  sideAvatar: { width:34, height:34, borderRadius:'50%', background:'linear-gradient(135deg,#f97316,#ec4899)', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0, overflow:'hidden' },
+  sideAvatar:  { width:34, height:34, borderRadius:'50%', background:'linear-gradient(135deg,#f97316,#ec4899)', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0, overflow:'hidden' },
   sideProfileName: { fontSize:13, fontWeight:600, color:'#e8ecf3', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' },
   sideProfileSub:  { fontSize:10, color:'#4a5260' },
   lockBtn: { display:'flex', alignItems:'center', justifyContent:'center', gap:6, padding:'9px', borderRadius:10, fontSize:12, fontWeight:500, background:'rgba(248,113,113,0.07)', border:'1px solid rgba(248,113,113,0.2)', color:'#f87171', cursor:'pointer', width:'100%' },
-  main: { flex:1, display:'flex', flexDirection:'column', minWidth:0 },
-  topBar: { display:'flex', justifyContent:'space-between', alignItems:'center', padding:'18px 28px 14px', background:'rgba(6,8,16,0.6)', backdropFilter:'blur(20px)', WebkitBackdropFilter:'blur(20px)', borderBottom:'1px solid rgba(255,255,255,0.06)', flexShrink:0 },
+  main:    { flex:1, display:'flex', flexDirection:'column', minWidth:0 },
+  topBar:  { display:'flex', justifyContent:'space-between', alignItems:'center', padding:'18px 28px 14px', background:'rgba(6,8,16,0.6)', backdropFilter:'blur(20px)', WebkitBackdropFilter:'blur(20px)', borderBottom:'1px solid rgba(255,255,255,0.06)', flexShrink:0 },
   pageTitle: { fontSize:22, fontWeight:700, color:'#f1f5f9', letterSpacing:'-0.02em' },
   pageSub:   { fontSize:10, color:'#4a5260', letterSpacing:'0.1em', marginTop:2 },
   topStats:  { display:'flex', gap:16 },
@@ -319,13 +355,55 @@ const D = {
   content:   { flex:1, overflowY:'auto', padding:'24px 28px', paddingBottom:100 },
 }
 
+// Mobile styles
 const M = {
-  shell: { height:'100vh', display:'flex', flexDirection:'column', background:'#060810' },
-  topBar: { display:'flex', justifyContent:'space-between', alignItems:'center', padding:'14px 16px 12px', background:'rgba(6,8,16,0.7)', backdropFilter:'blur(24px)', WebkitBackdropFilter:'blur(24px)', borderBottom:'1px solid rgba(255,255,255,0.07)', flexShrink:0 },
+  shell: {
+    height: '100vh',
+    display: 'flex', flexDirection: 'column',
+    background: '#060810',
+    overscrollBehavior: 'none',
+    position: 'fixed',
+    width: '100%',
+    top: 0, left: 0,
+  },
+  topBar: {
+    display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+    padding: '12px 16px 10px',
+    paddingTop: 'max(12px, env(safe-area-inset-top))',
+    background: 'rgba(6,8,16,0.9)',
+    backdropFilter: 'blur(24px)',
+    WebkitBackdropFilter: 'blur(24px)',
+    borderBottom: '1px solid rgba(255,255,255,0.07)',
+    flexShrink: 0,
+    zIndex: 10,
+  },
   topLeft: { display:'flex', alignItems:'center', gap:10 },
-  topLogo: { width:36, height:36, borderRadius:'50%', background:'linear-gradient(135deg,#4c1d95,#7c3aed)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:17, boxShadow:'0 0 14px rgba(124,58,237,0.45)' },
+  topLogo: {
+    width: 34, height: 34, borderRadius: '50%',
+    background: 'linear-gradient(135deg,#4c1d95,#7c3aed)',
+    display: 'flex', alignItems: 'center', justifyContent: 'center',
+    fontSize: 16, boxShadow: '0 0 12px rgba(124,58,237,0.45)',
+    flexShrink: 0,
+  },
   topTitle: { fontSize:15, fontWeight:700, color:'#f1f5f9', lineHeight:1.2 },
-  topSub:   { fontSize:9, fontWeight:600, color:'#4a5260', letterSpacing:'0.12em' },
-  lockBtn:  { background:'rgba(255,255,255,0.05)', backdropFilter:'blur(10px)', WebkitBackdropFilter:'blur(10px)', border:'1px solid rgba(255,255,255,0.1)', borderRadius:20, color:'#8a96a8', padding:'7px 14px', fontSize:12, display:'flex', alignItems:'center', gap:4, transition:'all 0.2s', cursor:'pointer' },
-  content:  { flex:1, overflowY:'auto', padding:'14px 16px', paddingBottom:100 },
+  topSub:   { fontSize:9,  fontWeight:600, color:'#4a5260', letterSpacing:'0.12em' },
+  lockBtn: {
+    background: 'rgba(255,255,255,0.05)',
+    backdropFilter: 'blur(10px)',
+    WebkitBackdropFilter: 'blur(10px)',
+    border: '1px solid rgba(255,255,255,0.1)',
+    borderRadius: 20, color: '#8a96a8',
+    padding: '6px 12px', fontSize: 12,
+    display: 'flex', alignItems: 'center', gap: 4,
+    transition: 'all 0.2s', cursor: 'pointer',
+    WebkitTapHighlightColor: 'transparent',
+  },
+  content: {
+    flex: 1,
+    overflowY: 'auto',
+    overflowX: 'hidden',
+    padding: '12px 14px',
+    paddingBottom: 'calc(80px + env(safe-area-inset-bottom))',
+    WebkitOverflowScrolling: 'touch',
+  },
 }
