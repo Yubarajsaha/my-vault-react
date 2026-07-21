@@ -306,6 +306,22 @@ export default function App() {
           </div>
         </div>
         <button
+          onClick={() => setSearchOpen(true)}
+          style={{
+            background: 'none',
+            border: 'none',
+            color: '#8a96a8',
+            fontSize: 20,
+            display: 'flex',
+            alignItems: 'center',
+            cursor: 'pointer',
+            padding: '4px 8px',
+            WebkitTapHighlightColor: 'transparent',
+          }}
+        >
+          🔍
+        </button>
+        <button
           onClick={handleLock}
           style={M.lockBtn}
           onMouseEnter={e => { e.currentTarget.style.borderColor='rgba(248,113,113,0.4)'; e.currentTarget.style.color='#f87171' }}
