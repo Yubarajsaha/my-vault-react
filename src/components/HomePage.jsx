@@ -130,7 +130,7 @@ function ActivityRow({ icon, iconBg, title, meta }) {
   )
 }
 
-export default function HomePage({ docs, photos, secrets, profile, activity, onTab }) {
+export default function HomePage({ docs, photos, secrets, profile, activity, onTab, onSearch, }) {
   const [hovCard, setHovCard]       = useState(null)
   const [searchHov, setSearchHov]   = useState(false)
   const [viewAllHov, setViewAllHov] = useState(false)
@@ -175,7 +175,7 @@ export default function HomePage({ docs, photos, secrets, profile, activity, onT
             <div style={S.heroSub}>Your vault is unlocked and secure.</div>
           </div>
         </div>
-
+      </div>
         {/* Stats */}
         <div style={S.statsRow}>
           <div style={S.stat}>
@@ -194,23 +194,27 @@ export default function HomePage({ docs, photos, secrets, profile, activity, onT
 
         {/* Search */}
         <div
+          onClick={onSearch}
           onMouseEnter={() => setSearchHov(true)}
           onMouseLeave={() => setSearchHov(false)}
           style={{
             ...S.search,
-            borderColor: searchHov ? 'rgba(255,255,255,0.14)' : 'rgba(255,255,255,0.07)',
+            borderColor: searchHov ? 'rgba(167,139,250,0.4)' : 'rgba(255,255,255,0.07)',
             background: searchHov ? '#12161f' : '#0d1018',
             transition: 'all 0.2s',
+            cursor: 'pointer',
           }}
         >
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4a5260" strokeWidth="2" strokeLinecap="round">
             <circle cx="11" cy="11" r="8"/>
             <line x1="21" y1="21" x2="16.65" y2="16.65"/>
           </svg>
-          <input placeholder="Search your vault..." style={S.searchInput} readOnly/>
+          <span style={{ ...S.searchInput, color: '#4a5260', fontSize: 12 }}>
+            Search your vault...
+          </span>
           <span style={S.searchKey}>⌘K</span>
+          
         </div>
-      </div>
 
       {/* Cards grid */}
       <div style={S.grid}>
@@ -277,12 +281,12 @@ const S = {
     backdropFilter: 'blur(24px)',
     WebkitBackdropFilter: 'blur(24px)',
     border: '1px solid rgba(255,255,255,0.08)',
-    borderRadius: 18, padding: '16px', marginBottom: 10,
+    borderRadius: 18, padding: '20px', marginBottom: 14,
     boxShadow: '0 8px 32px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.05)',
   },
   heroRow: {
     display: 'flex', alignItems: 'center',
-    gap: 12, marginBottom: 14,
+    gap: 14, marginBottom: 18,
   },
   avatar: {
     width: 48, height: 48, borderRadius: '50%',
@@ -323,6 +327,7 @@ const S = {
   searchInput: {
     flex: 1, background: 'none', border: 'none',
     color: '#64748b', fontSize: 12, outline: 'none',
+    pointerEvents: 'none',
   },
   searchKey: {
     fontSize: 9, color: '#374151',

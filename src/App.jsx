@@ -9,6 +9,7 @@ import ProfilePage    from './components/ProfilePage'
 import SettingsPage   from './components/SettingsPage'
 import BottomNav      from './components/BottomNav'
 import UpdateBanner from './components/UpdateBanner'
+import SearchModal from './components/SearchModal'
 import { getUser, saveUser, getSettings, saveSettings, loadVault, saveVault, clearAll } from './store'
 import './index.css'
 
@@ -42,6 +43,7 @@ export default function App() {
   const [profile,   setProfile]   = useState({})
   const [activity,  setActivity]  = useState([])
   const [isDesktop, setIsDesktop] = useState(window.innerWidth >= 768)
+  const [searchOpen, setSearchOpen] = useState(false)
 
   useEffect(() => {
     const fn = () => setIsDesktop(window.innerWidth >= 768)
@@ -174,6 +176,7 @@ export default function App() {
     docs, photos, secrets, profile, activity, password,
     onTab: setTab, onDelete: handleDelete,
     onAdded: handleAdded, onUpdate: handleProfileUpdate, onLock: handleLock,
+    onSearch: () => setSearchOpen(true),
   }
 
   // Loading spinner
@@ -192,6 +195,15 @@ export default function App() {
   if (isDesktop) return (
     <div style={D.shell}>
       <UpdateBanner/>
+      <SearchModal
+        open={searchOpen}
+        onClose={() => setSearchOpen(false)}
+        docs={docs}
+        photos={photos}
+        secrets={secrets}
+        password={password}
+        onTab={setTab}
+      />
       <aside style={D.sidebar}>
         <div style={D.sideTop}>
           <div style={D.sideLogo}>
@@ -276,6 +288,15 @@ export default function App() {
   return (
     <div style={M.shell}>
       <UpdateBanner/>
+      <SearchModal
+        open={searchOpen}
+        onClose={() => setSearchOpen(false)}
+        docs={docs}
+        photos={photos}
+        secrets={secrets}
+        password={password}
+        onTab={setTab}
+      />
       <div style={M.topBar}>
         <div style={M.topLeft}>
           <div style={M.topLogo}>🔐</div>
